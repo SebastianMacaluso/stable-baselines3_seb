@@ -23,6 +23,8 @@ class PPO(OnPolicyAlgorithm):
     https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail and
     Stable Baselines (PPO2 from https://github.com/hill-a/stable-baselines)
 
+    (PPO1 from stablebasekines 2 was not written for GPUs) SM
+
     Introduction to PPO: https://spinningup.openai.com/en/latest/algorithms/ppo.html
 
     :param policy: The policy model to use (MlpPolicy, CnnPolicy, ...)
@@ -30,7 +32,7 @@ class PPO(OnPolicyAlgorithm):
     :param learning_rate: The learning rate, it can be a function
         of the current progress remaining (from 1 to 0)
     :param n_steps: The number of steps to run for each environment per update
-        (i.e. rollout buffer size is n_steps * n_envs where n_envs is number of environment copies running in parallel)
+        (i.e. rollout buffer size is n_steps * n_envs where n_envs is number of environment copies running in parallel). It is bigger than the batch size.
         NOTE: n_steps * n_envs must be greater than 1 (because of the advantage normalization)
         See https://github.com/pytorch/pytorch/issues/29372
     :param batch_size: Minibatch size
@@ -79,7 +81,7 @@ class PPO(OnPolicyAlgorithm):
         policy: Union[str, Type[ActorCriticPolicy]],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 3e-4,
-        n_steps: int = 2048,
+        n_steps: int = 2048,  
         batch_size: int = 64,
         n_epochs: int = 10,
         gamma: float = 0.99,
@@ -193,7 +195,7 @@ class PPO(OnPolicyAlgorithm):
         clip_fractions = []
 
         continue_training = True
-        # train for n_epochs epochs
+        # train for n_epochs epochs. Number of NN updates we do before making a new rollout (SM)
         for epoch in range(self.n_epochs):
             approx_kl_divs = []
             # Do a complete pass on the rollout buffer

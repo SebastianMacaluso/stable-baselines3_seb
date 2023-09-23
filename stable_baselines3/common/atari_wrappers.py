@@ -282,7 +282,7 @@ class AtariWrapper(gym.Wrapper[np.ndarray, int, np.ndarray, int]):
         self,
         env: gym.Env,
         noop_max: int = 30,
-        frame_skip: int = 4,
+        frame_skip: int = 3,
         screen_size: int = 84,
         terminal_on_life_loss: bool = True,
         clip_reward: bool = True,
@@ -294,6 +294,8 @@ class AtariWrapper(gym.Wrapper[np.ndarray, int, np.ndarray, int]):
             env = NoopResetEnv(env, noop_max=noop_max)
         # frame_skip=1 is the same as no frame-skip (action repeat)
         if frame_skip > 1:
+            print(f"Setting frame_skip to {frame_skip}")
+            print("------------------------------------")
             env = MaxAndSkipEnv(env, skip=frame_skip)
         if terminal_on_life_loss:
             env = EpisodicLifeEnv(env)
