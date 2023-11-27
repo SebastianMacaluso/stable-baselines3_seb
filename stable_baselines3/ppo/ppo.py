@@ -210,7 +210,7 @@ class PPO(OnPolicyAlgorithm):
                     self.policy.reset_noise(self.batch_size)
 
                 values, log_prob, entropy = self.policy.evaluate_actions(rollout_data.observations, actions)
-                values = values.flatten()
+                values = values.flatten() # values is the Q-function value (long term expected reward) SM
                 # Normalize advantage
                 advantages = rollout_data.advantages
                 # Normalization does not make sense if mini batchsize == 1, see GH issue #325
@@ -240,7 +240,7 @@ class PPO(OnPolicyAlgorithm):
                         values - rollout_data.old_values, -clip_range_vf, clip_range_vf
                     )
                 # Value loss using the TD(gae_lambda) target
-                value_loss = F.mse_loss(rollout_data.returns, values_pred)
+                value_loss = F.mse_loss(rollout_data.returns, values_pred)  # see common/buffers.py -> compute_returns_and_advantage for more details (SM)
                 value_losses.append(value_loss.item())
 
                 # Entropy loss favor exploration

@@ -264,7 +264,7 @@ class CheckpointCallback(BaseCallback):
         name_prefix: str = "rl_model",
         save_replay_buffer: bool = False,
         save_vecnormalize: bool = False,
-        verbose: int = 0,
+        verbose: int = 2,
     ):
         super().__init__(verbose)
         self.save_freq = save_freq

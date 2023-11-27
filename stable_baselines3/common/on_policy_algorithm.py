@@ -8,7 +8,7 @@ from gymnasium import spaces
 
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.buffers import DictRolloutBuffer, RolloutBuffer
-from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.callbacks import CallbackList, BaseCallback, CheckpointCallback
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import obs_as_tensor, safe_mean
@@ -288,6 +288,9 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                 self.logger.dump(step=self.num_timesteps)
 
             self.train()
+
+            # CheckpointCallback._init_callback()
+            # CheckpointCallback._init_callback()
 
         callback.on_training_end()
 
