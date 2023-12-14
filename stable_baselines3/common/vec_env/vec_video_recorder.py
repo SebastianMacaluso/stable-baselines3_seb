@@ -1,7 +1,7 @@
 import os
 from typing import Callable
 
-from gymnasium.wrappers.monitoring import video_recorder
+from gymnasium.wrappers.monitoring import video_recorder #https://github.com/openai/gym/blob/master/gym/wrappers/monitoring/video_recorder.py
 
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv, VecEnvObs, VecEnvStepReturn, VecEnvWrapper
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
@@ -31,6 +31,8 @@ class VecVideoRecorder(VecEnvWrapper):
         record_video_trigger: Callable[[int], bool],
         video_length: int = 200,
         name_prefix: str = "rl-video",
+        render_fps: int = 30,
+        video_name: str,
     ):
         VecEnvWrapper.__init__(self, venv)
 
@@ -48,7 +50,10 @@ class VecVideoRecorder(VecEnvWrapper):
         else:
             metadata = temp_env.metadata
 
+        metadata["render_fps"]= int(render_fps)
         self.env.metadata = metadata
+        # print("Metadata = ", self.env.metadata)
+
         assert self.env.render_mode == "rgb_array", f"The render_mode must be 'rgb_array', not {self.env.render_mode}"
 
         self.record_video_trigger = record_video_trigger
@@ -59,6 +64,7 @@ class VecVideoRecorder(VecEnvWrapper):
         self.name_prefix = name_prefix
         self.step_id = 0
         self.video_length = video_length
+        self.video_name = video_name
 
         self.recording = False
         self.recorded_frames = 0
@@ -71,18 +77,19 @@ class VecVideoRecorder(VecEnvWrapper):
     def start_video_recorder(self) -> None:
         self.close_video_recorder()
 
-        video_name = f"{self.name_prefix}-step-{self.step_id}-to-step-{self.step_id + self.video_length}"
+        video_name = self.video_name+f"_frame-rate-{self.env.metadata['render_fps']}-{self.name_prefix}-step-{self.step_id}-to-step-{self.step_id + self.video_length}"
         base_path = os.path.join(self.video_folder, video_name)
+
         self.video_recorder = video_recorder.VideoRecorder(
             env=self.env, base_path=base_path, metadata={"step_id": self.step_id}
-        )
+        ) #Uses the video recorder from https://github.com/openai/gym/blob/master/gym/wrappers/monitoring/video_recorder.py
 
         self.video_recorder.capture_frame()
         self.recorded_frames = 1
         self.recording = True
 
     def _video_enabled(self) -> bool:
-        return self.record_video_trigger(self.step_id)
+        return self.record_video_trigger(self.step_id) #returns true when the step_id matched the starting step to record a video
 
     def step_wait(self) -> VecEnvStepReturn:
         obs, rews, dones, infos = self.venv.step_wait()
@@ -94,7 +101,7 @@ class VecVideoRecorder(VecEnvWrapper):
             if self.recorded_frames > self.video_length:
                 print(f"Saving video to {self.video_recorder.path}")
                 self.close_video_recorder()
-        elif self._video_enabled():
+        elif self._video_enabled(): #If start recording
             self.start_video_recorder()
 
         return obs, rews, dones, infos
